@@ -13,11 +13,11 @@ $query = array("username" => array("$ne" => ""), "password" => array("$ne" => ""
 
 noSQL username and password enumeration:
 It's possible to use also regular expressions in query and try to guess username letters one by one.
-username[$regex]="^{letter from wordlist}"&password[$regex]=""""
+username[$regex]="^{letter from wordlist}"&password[$ne]=""""
 
-If we have username for example alice we start with letter with following query:
+If there is username for example "alice" and we start with first letter from wordlist 'a' with following query:
 username="{found username}"&password[$regex]="^a"
-querry returns true so we know that there is username who starts with letter a. If query returns false we continue with next letter from wordlist. In this way is possible to expose whole username. It's necessary to go through all wordlist even if query returns true because there could be more usernames with same username prefix (in script is possible to solve it with recursions).
+the querry returns true so we know that there is username with letter a on first possition. If query returns false we continue with next letter from wordlist. In this way is possible to expose whole username letter by letter. It's necessary to go through all wordlist letters even if query returns true because there could be more usernames specified (alice, alida, allisha,... and of course bob) with same username prefix (in script is possible to solve it with recursions).
 
 after usernames enumeration it's possible to expose also passwords with following querry:
 username="{found username}"&password[$regex]="^{letter from wordlist}"
