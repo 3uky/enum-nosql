@@ -1,5 +1,5 @@
 # enum-nosql
-MongoDB noSQL injection example from "Hack the Box" for password guessing.
+MongoDB noSQL injection example from "Hack the Box" for usernames and their password enumeration.
 
 noSQL injection autentication bypass:
 If parameter values are directly taken from autentization form as follow:
